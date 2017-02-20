@@ -93,18 +93,7 @@ function createGraph(year){
 			.append('g')
 			.attr('transform','translate('+margin.l+','+margin.t+')')
 			
-data=[[250,250]];
 
-svg.selectAll('circle').data(data).enter().append('circle').attrs({
-		cx:function(d){return d[0]},
-		cy:function(d){return d[1]},
-		fill:"black",
-		r:5
-
-
-
-
-})
 
 
 
@@ -124,8 +113,18 @@ svg.selectAll('circle').data(data).enter().append('circle').attrs({
 
 }
 
-createGraph();
+var updateGraph =function(){console.log(1);} 
+ 
+d3.select('#form').append('form').attr('id','formYear').append('select').selectAll('option')
+		.data(Object.keys(graphDataMap)).enter()
+		.append('option').attr('value',function(d){return d}).text(function(d){return d})
 
+d3.select('#form').on('change',updateGraph)
+
+
+
+
+         
 
 
 });
