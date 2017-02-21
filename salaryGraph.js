@@ -56,7 +56,7 @@ d3.csv('data/salaryData.csv',function(err,data){
  		
  		});
  	
- 	data.forEach((player)=>{
+ 	data.forEach((player,i)=>{
  		var arrayIndex=teams[[player['Tm']]];
  		
  		array[arrayIndex][player['Player']]=player[year];
@@ -69,7 +69,28 @@ d3.csv('data/salaryData.csv',function(err,data){
  	return array;
  }
  
-
+ var graphDataKeys= function(year){
+ 		var array=[];
+ 		
+ 		Object.keys(teams).forEach((team)=>{
+ 			array.push({'team':team});
+ 		
+ 		});
+ 	
+ 	data.forEach((player,i)=>{
+ 		var arrayIndex=teams[[player['Tm']]];
+ 		
+ 		array[arrayIndex]['player'+Object.keys(array[arrayIndex]).length]=player[year];
+ 		
+ 		
+ 		
+ 		
+ 		})
+ 		
+ 		//Making a total for each team
+ 
+ 	return array;
+ }
  
 	data2017=graphData('2016-17');
 	data2018=graphData('2017-18');
@@ -78,40 +99,44 @@ d3.csv('data/salaryData.csv',function(err,data){
 	data2021=graphData('2020-21');
 	data2022=graphData('2021-22');
     dataGuaranteed=graphData('Guaranteed');
- 
+ 	dataKeys2017=graphDataKeys('2016-17');
  var graphData=[data2017,data2018,data2019,data2020,data2021,data2022,dataGuaranteed]
  var  graphDataMap={'2016-17':0,'2017-18':1,'2018-19':2,'2019-20':3,'2020-21':4,'2021-22':5,'Guaranteed':6}
 //Chart goes here
 
-function createGraph(year){
-    if(!($('svg')==0)){d3.select('svg').remove}
-    
-    
-  var svg = d3.select('div').append('svg')
+
+ var keysFun=function(data){
+  
+  
+  var team= data.reduce((holder,team)=>{
+   		if(Object.keys(holder).length <Object.keys(team).length){
+   		return team}
+   		return holder
+   		},data[0])
+  
+ 
+ 
+  return Object.keys(data[teams[team['team']]]).slice(1);
+
+}
+
+
+ var svg = d3.select('#root').append('svg')
 			.attr("width", w+margin.l+margin.r)
 			.attr("height",h+margin.t+margin.b)
 			.append('g')
 			.attr('transform','translate('+margin.l+','+margin.t+')')
 			
 
+//scale
+var yScale=d3.scaleLinear()
 
 
 
+var keys=keysFun(dataKeys2017)
 
+var stack=d3.stack().keys(keys)
 
-
- 
- 
-
-    
-     
-
-
-
-
-
-
-}
 
 var updateGraph =function(){console.log(1);} 
  
