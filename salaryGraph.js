@@ -14,6 +14,23 @@ var dataGuaranteed=[];
 var teams={};
 var teamsOrdered={};
 
+//scales
+var xScale=d3.scaleBand()
+				.range([0,w]);
+				
+var yScale =d3.scaleLinear()
+				.range(h,0)
+//build colors
+var ordinalColors=d3.schemeCategory20;
+     ordinalColors.push('#000000')
+     ordinalColors.push('#ffff00')
+     ordinalColors.push('#0000ff')
+     ordinalColors.push('#80ff00')
+     ordinalColors.push('#7f7f00') 
+var colors=d3.scaleOrdinal(ordinalColors);
+
+	
+
 //data and making the chart
 d3.csv('data/salaryData.csv',function(err,data){
     if(err){console.log('there was an error')}
@@ -87,9 +104,27 @@ d3.csv('data/salaryData.csv',function(err,data){
  		
  		})
  		
- 		//Making a total for each team
+ 		//Making a total for each team for yScales
  
- 	return array;
+ 	 array.forEach((team,i)=>{
+ 	  Object.keys(team).forEach((play)=>{
+ 	      
+ 	     if(play=='team'){
+ 	          
+ 	        array[i]['total']=0;
+ 	     
+ 	     }else{
+ 	     
+ 	     array[i]['total']+=parseInt(team[play]);
+ 	     
+ 	     }
+ 	  
+ 	  	})
+ 	 
+ 	 
+ 	 })
+ 	 
+ 	 return array;
  }
  
 	data2017=graphData('2016-17');
@@ -105,7 +140,7 @@ d3.csv('data/salaryData.csv',function(err,data){
 //Chart goes here
 
 
- var keysFun=function(data){
+  keysFun=function(data){
   
   
   var team= data.reduce((holder,team)=>{
@@ -129,7 +164,9 @@ d3.csv('data/salaryData.csv',function(err,data){
 			
 
 //scale
-var yScale=d3.scaleLinear()
+   xScale.domain(dataKeys2017.map((d)=>{return d.team}))
+   
+   
 
 
 
