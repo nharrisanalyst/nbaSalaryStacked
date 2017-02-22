@@ -126,7 +126,7 @@ d3.csv('data/salaryData.csv',function(err,data){
  	 
  	 return array;
  }
- 
+//data 
 	data2017=graphData('2016-17');
 	data2018=graphData('2017-18');
 	data2019=graphData('2018-19');
