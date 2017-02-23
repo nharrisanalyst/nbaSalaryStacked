@@ -1,8 +1,8 @@
 //d3 boilerplate
 
-var margin={t: 20, r:20, b:20, l:20};
-var h=500-margin.t-margin.b;
-var w= 800-margin.l-margin.r;
+var margin={t: 20, r:20, b:20, l:75};
+var h=600-margin.t-margin.b;
+var w= 1200-margin.l-margin.r;
 
 var data2017=[];
 var data2018=[];
@@ -16,13 +16,15 @@ var teamsOrdered={};
 
 //scales
 var xScale=d3.scaleBand()
-				.range([0,w]);
+				.range([0,w])
+				.paddingInner([0.1])
+				.paddingOuter([.1]);
 				
 var yScale =d3.scaleLinear()
-				.range(h,0)
+				.range([h,0]);
 //build colors
 var ordinalColors=d3.schemeCategory20;
-     ordinalColors.push('#000000')
+     ordinalColors.push('#000000');
      ordinalColors.push('#ffff00')
      ordinalColors.push('#0000ff')
      ordinalColors.push('#80ff00')
@@ -52,8 +54,22 @@ d3.csv('data/salaryData.csv',function(err,data){
 		
 		
 		}
-     
-   
+ //function to find all the keys    
+  var keysFun=function(data){
+  
+  
+  var team= data.reduce((holder,team)=>{
+   		if(Object.keys(holder).length <Object.keys(team).length){
+   		return team}
+   		return holder
+   		},data[0])
+  
+  var array = Object.keys(data[teams[team['team']]]).slice(1);
+  		array.pop()
+ 
+  return array;
+
+}  
 //Sorting Map by alphabetical order for better graph presentation    
      
      Object.keys(teams).sort().forEach((team,i)=>{
@@ -97,7 +113,7 @@ d3.csv('data/salaryData.csv',function(err,data){
  	data.forEach((player,i)=>{
  		var arrayIndex=teams[[player['Tm']]];
  		
- 		array[arrayIndex]['player'+Object.keys(array[arrayIndex]).length]=player[year];
+ 		array[arrayIndex]['player'+Object.keys(array[arrayIndex]).length]=parseInt(player[year]);
  		
  		
  		
@@ -124,6 +140,24 @@ d3.csv('data/salaryData.csv',function(err,data){
  	 
  	 })
  	 
+ //fixing players in every team so that every team has the same amount of players but those that don't actually have a the player 
+ 		//the value is set to zero so that it does not return NaN
+ 		//First find the longest teams keys and then set teams that dont have that player add it and set it's value to 0	 
+var keys=keysFun(array);
+ 	 
+ 	 keys.forEach((key)=>{
+ 	    array.forEach((team,i)=>{
+ 	    if(!(key in team)){
+ 	      array[i][key]=0;
+ 	    
+ 	    }
+ 	   })
+ 	})
+ 	 
+ 	 
+ 	 
+ 	 
+ 	 
  	 return array;
  }
 //data 
@@ -140,7 +174,7 @@ d3.csv('data/salaryData.csv',function(err,data){
 //Chart goes here
 
 
-  keysFun=function(data){
+ var keysFun=function(data){
   
   
   var team= data.reduce((holder,team)=>{
@@ -149,10 +183,17 @@ d3.csv('data/salaryData.csv',function(err,data){
    		return holder
    		},data[0])
   
+  var array = [];
+   Object.keys(team).forEach((key)=>{
+      if(key !='total' && key !='team'){
+        array.push(key);
+		 }
+   })
+  
+  		
+ console.log(array)
+  return array;
  
- 
-  return Object.keys(data[teams[team['team']]]).slice(1);
-
 }
 
 
@@ -167,21 +208,72 @@ d3.csv('data/salaryData.csv',function(err,data){
    xScale.domain(dataKeys2017.map((d)=>{return d.team}))
    
    
+    yScale.domain([0,d3.max(dataKeys2017,function(d){return d.total})])
+//axis
+var xAxis=d3.axisBottom(xScale)
+var yAxis=d3.axisLeft(yScale)
 
+var xAxis=svg.append('g').attr('id','xScale').attr('transform','translate(0,'+h+')').call(xAxis);
+ var yAxis=svg.append('g').attr('id','yScale').call(yAxis);
 
-
+//keys for stack data
 var keys=keysFun(dataKeys2017)
-
+//making stack data
 var stack=d3.stack().keys(keys)
 
+var stackData=stack(dataKeys2017)
 
-var updateGraph =function(){console.log(1);} 
+  console.log(stackData)
+
+svg.attr('fill','white').append('g').selectAll('g')
+			.data(stackData).enter().append('g').attr('fill',function(d){return colors(d.key) })
+			.selectAll('rect').data(function(d){return d}).enter()
+			.append('rect')
+			.attr('y',function(d){return yScale(d[1])})
+			.attr('x',function(d){ return xScale(d.data.team)})
+			.attr('width',function(d){return xScale.bandwidth()})
+			.attr('height', function(d){return (yScale(d[0])-yScale(d[1]));})
+			
+		svg.append('line').attr('id','line').attrs({
+											x1:0,
+											x2:w,
+											y1:yScale(92000000),
+											y2:yScale(92000000),
+											'stroke-width':1,
+											stroke:'black',
+											'stroke-dasharray':"5, 5"
+
+										})
+										
+										
+var upDateGraph(year){
+
+var data=graphDataKeys(year);
+ var keys=keysFun(data);
+
+yScale.domain([0,d3.max(data,function(d){return d.total})])
+
+
+
+
+
+}										
+										
+										
+										
+
+var updateGraph =function(){
+				$(this)[0][0].value
+
+
+} 
  
-d3.select('#form').append('form').attr('id','formYear').append('select').selectAll('option')
+d3.select('#form').append('form').attr('id','formYear').append('select').attr('form','formYear')
+		.selectAll('option')
 		.data(Object.keys(graphDataMap)).enter()
 		.append('option').attr('value',function(d){return d}).text(function(d){return d})
-
-d3.select('#form').on('change',updateGraph)
+		
+		d3.select('#formYear').on('change',updateGraph)
 
 
 
