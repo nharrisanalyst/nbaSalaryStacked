@@ -213,8 +213,8 @@ var keys=keysFun(array);
 var xAxis=d3.axisBottom(xScale)
 var yAxis=d3.axisLeft(yScale)
 
-var xAxis=svg.append('g').attr('id','xScale').attr('transform','translate(0,'+h+')').call(xAxis);
- var yAxis=svg.append('g').attr('id','yScale').call(yAxis);
+var xAxis=svg.append('g').attr('class','xAxis').attr('transform','translate(0,'+h+')').call(xAxis);
+ var yAxis=svg.append('g').attr('class','yAxis').call(yAxis);
 
 //keys for stack data
 var keys=keysFun(dataKeys2017)
@@ -225,7 +225,7 @@ var stackData=stack(dataKeys2017)
 
   console.log(stackData)
 
-svg.attr('fill','white').append('g').selectAll('g')
+svg.append('g').selectAll('g')
 			.data(stackData).enter().append('g').attr('fill',function(d){return colors(d.key) })
 			.selectAll('rect').data(function(d){return d}).enter()
 			.append('rect')
@@ -246,14 +246,45 @@ svg.attr('fill','white').append('g').selectAll('g')
 										})
 										
 										
-var upDateGraph(year){
+var upDate=function(data,keys){
+    
+	
+ 	
+	var stack=d3.stack().keys(keys)
 
-var data=graphDataKeys(year);
- var keys=keysFun(data);
-
-yScale.domain([0,d3.max(data,function(d){return d.total})])
-
-
+	var stackData=stack(data)
+	
+	yScale.domain([0,d3.max(data,function(d){return d.total})])
+	var yAxis=d3.axisLeft(yScale)
+	
+	svg.select('.yAxis')
+		.transition().duration(5000)
+		.call(yAxis);
+		
+		
+	var g = svg.selectAll('g').data(stackData)
+	
+	g.exit().remove();
+	
+		
+	g.selectAll('g').data(stackData).enter().append('g')
+					.transition().duration(5000)
+					.attr('fill',function(d){return colors(d.key) });
+			
+			
+	var rect=g.selectAll('rect').data(function(d){return d})
+	
+	rect.exit().remove();
+	
+	
+	rect.enter()
+			.append('rect')
+			.transition().duration(5000)
+			.attr('y',function(d){return yScale(d[1])})
+			.attr('x',function(d){ return xScale(d.data.team)})
+			.attr('width',function(d){return xScale.bandwidth()})
+			.attr('height', function(d){return (yScale(d[0])-yScale(d[1]));})
+	
 
 
 
@@ -263,7 +294,11 @@ yScale.domain([0,d3.max(data,function(d){return d.total})])
 										
 
 var updateGraph =function(){
-				$(this)[0][0].value
+             year=$(this)[0][0].value
+             console.log(year)
+             var data=graphDataKeys(year)
+             var keys=keysFun(data);
+            upDate(data,keys)
 
 
 } 
