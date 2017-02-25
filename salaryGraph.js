@@ -1,3 +1,10 @@
+//initialize state for year
+var state={year:'2016-17'};
+
+
+
+
+
 //d3 boilerplate
 
 var margin={t: 20, r:20, b:20, l:75};
@@ -46,8 +53,8 @@ var upDateLine = function(year){
          cap['2017-18']= {cap:102000000,tax:122000000}; 
          cap['2018-19']= {cap:108000000,tax:128000000};
          cap['2019-20']= {cap:109000000,tax:129000000};
-         cap['2021-22']= {cap:114000000,tax:134000000}; 
-         cap['2022-23']= {cap:115000000,tax:135000000};        
+         cap['2020-21']= {cap:114000000,tax:134000000}; 
+         cap['2021-22']= {cap:115000000,tax:135000000};        
         cap['Guaranteed']={cap:0,tax:0};        
         
            var lineData=[cap[year]]
@@ -115,6 +122,56 @@ var upDateLine = function(year){
 d3.csv('data/salaryData.csv',function(err,data){
     if(err){console.log('there was an error')}
      else{
+     
+      
+     
+//mouseover/ mouseremove functions
+
+
+var toolDisplay = function(d,i,j){
+          function commaSeparateNumber(val){
+    while (/(\d+)(\d{3})/.test(val.toString())){
+      val = val.toString().replace(/(\d+)(\d{3})/, '$1'+','+'$2');
+    }
+    return val;
+  }
+        
+        
+        console.log(d.data.team);
+       
+        console.log(i)
+        var id = parseInt($(this).parent().attr('id'));
+		console.log(id);
+		console.log(state.year)
+		
+	$(this).popover({
+				container: 'body',
+				html:'true',
+				placement:'auto top',
+				trigger: 'manual',
+				content: function(){return 'Player: '+ Object.keys(graphData[graphDataMap[state.year]][i])[id+1]+
+						  '<br>Salary: $'+
+						  commaSeparateNumber(graphData[graphDataMap[state.year]][i][Object.keys(graphData[graphDataMap[state.year]][i])[id+1]])+'</br>'
+							}
+		
+		})
+	console.log(graphData[graphDataMap[state.year]][i][Object.keys(graphData[graphDataMap[state.year]][i])[id+1]]);	
+	$(this).popover('show')
+}
+
+
+var toolRemove = function(d){
+
+          
+           
+           $('.popover').remove();
+           
+           
+    }
+
+
+     
+     
 //Creating Chart team map object
 		for(var i = 0;i<=data.length-1;i++){
 		
@@ -159,7 +216,7 @@ d3.csv('data/salaryData.csv',function(err,data){
      console.log(data);
      }
  //function that creates object by year for stacked bar graph D3
- var graphData= function(year){
+	var graphData= function(year){
  		var array=[];
  		
  		Object.keys(teams).forEach((team)=>{
@@ -298,13 +355,18 @@ var stackData=stack(dataKeys2017)
   
 
 svg.append('g').selectAll('g')
-			.data(stackData).enter().append('g').attr('class','barG').attr('fill',function(d){return colors(d.key) })
+			.data(stackData).enter().append('g').attr('class','barG').attr('id',function(d,i){return i})
+			.attr('fill',function(d){return colors(d.key) })
 			.selectAll('rect').data(function(d){return d}).enter()
 			.append('rect')
 			.attr('y',function(d){return yScale(d[1])})
 			.attr('x',function(d){ return xScale(d.data.team)})
 			.attr('width',function(d){return xScale.bandwidth()})
 			.attr('height', function(d){return (yScale(d[0])-yScale(d[1]));})
+			.on('mouseover',toolDisplay)
+			.on('mouseout',toolRemove);
+			
+			
 			
 		svg.append('line').attr('id','lineCap').attrs({
 											x1:0,
@@ -330,7 +392,8 @@ svg.append('g').selectAll('g')
 										
 										
 var upDate=function(year){
-    console.log(year=='2017-18')
+//update state year
+    state.year=year
 	
  	
 	
@@ -376,13 +439,18 @@ if(year=='Guaranteed'){
 			.data(upDateData)
 			
 			
-	var rect=g.selectAll('rect').data(function(d){return d})
-			.transition().duration(5000)
+	var rect=g.selectAll('rect').data(function(d){return d});
+			
+			
+			rect.transition().duration(5000)
 			.attr('y',function(d){return yScale(d[1])})
 			.attr('x',function(d){ return xScale(d.data.team)})
 			.attr('width',function(d){return xScale.bandwidth()})
-			.attr('height', function(d){return (yScale(d[0])-yScale(d[1]));})	
+			.attr('height', function(d){return (yScale(d[0])-yScale(d[1]));});	
 			
+			
+			rect.on('mouseover',toolDisplay)
+			.on('mouseout',toolRemove);
 			}	
 		
 	
