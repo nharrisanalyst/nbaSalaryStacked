@@ -379,6 +379,8 @@ svg.append('g').selectAll('g')
 
 										})
 										
+										
+										
 		svg.append('line').attr('id','lineTax').attrs({
 											x1:0,
 											x2:w,
@@ -483,9 +485,38 @@ d3.select('#form').append('form').attr('id','formYear').append('select').attr('f
 		d3.select('#formYear').on('change',updateGraph)
 
 
+var legendData=['Salary Cap','Luxury Tax Threshold'];
 
+var leg=d3.select('#legend').append('svg')
+							.attrs({
+								width:200,
+								height:75,
+								'id':'legendSVG'
+								
+							
+							}).selectAll('line').data(legendData);
 
-         
+     leg.enter().append('line')
+     .attrs({
+     		'x1':5,
+     		'x2':30,
+     		'y1':function(d,i){return (i*20)+10},
+     		'y2':function(d,i){return (i*20)+10},
+     		'stroke-width':1,
+     		'stroke-dasharray':"5, 5",
+     		stroke:function(d,i){if(i==0){return 'black'}else{return '#8b0000'}}
+     		
+     
+     })
+     
+     
+     var legText = d3.select("#legendSVG").selectAll('text').data(legendData);
+     
+     legText.enter().append('text').attrs({
+     							x:35,
+     							y:function(d,i){return (i*20)+15},
+     							'fill':function(d,i){if(i==0){return 'black'}else{return '#8b0000'}}
+     							}).text(function(d){return d});  
 
 
 });
